@@ -1,0 +1,61 @@
+﻿@model ETAWarrantLookup.ViewModels.WarrantSearchViewModel;
+
+@{
+    ViewData["Title"] = "Warrant Search";
+
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "searchForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="card" style="border-radius:15px;">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm">
+                    <label for="LastName" class="form-label">Last Name</label>
+                    @Html.EditorFor(m => m.LastName, new { htmlAttributes = new { @class = "form-control", @style = "text-transform:uppercase" } })
+                </div>
+                <div class="col-sm">
+                    <label for="FirstName" class="form-label">First Name</label>
+                    @Html.EditorFor(m => m.FirstName, new { htmlAttributes = new { @class = "form-control", @style = "text-transform:uppercase" } })
+                </div>
+                <div class="col-sm">
+                    <label for="Race" class="form-label">Race</label>
+                    @Html.DropDownListFor(m => m.Race, Model.RaceList,"--Select--", new{ @class= "form-control"})
+                </div>
+                <div class="col-sm">
+                    <label for="Sex" class="form-label">Sex</label>
+                    @Html.DropDownListFor(m => m.Sex, Model.SexList,"--Select--", new{ @class= "form-control"})
+                </div>
+                <div class="col-sm">
+                    <label for="Court" class="form-label">Court</label>
+                    @Html.DropDownListFor(m => m.Court, Model.CourtList,"--Select--", new{ @class= "form-control"})
+                </div>
+                <div class="col-sm">
+                    <label class="form-label">  </label>
+                    <input id="btnSearch" type="button" value="Query" class="btn btn-info form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card" style="border-radius:15px;">
+    <div class="card-body">
+        <div id="searchResults"></div>
+    </div>
+</div>
+
+
+@section scripts
+{
+<script type="text/javascript">
+        var url = '@Url.Action("SearchResults", "Warrant")';
+    $('#btnSearch').click(function() {
+      var formData = $("#searchForm").serialize();
+      $('#searchResults').load(url, formData);
+      return false; // prevent the default submit action
+    })
+
+</script>
+}

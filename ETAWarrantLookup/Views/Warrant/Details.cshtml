@@ -1,0 +1,138 @@
+﻿@model IEnumerable<WarrantModel>
+
+@if (@Model.Count() == 0)
+{
+    <div class="card text-center" style="border-radius:15px">
+        <div class="card-header">
+            <p>Data Error</p>
+        </div>
+        <div class="card-body text-center">           
+                <p>The details for this warrant cannot be retrieved due to inconsistencies with the record.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card text-center" style="border-radius:15px">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-sm"> <h5>Court Info:</h5> @Model.First().GNAME </div>
+                <div class="col-sm"><label>Phone:</label>@Model.First().GPHONE</div>
+                <div class="col-sm"> <h5>Police Dept Info:</h5> @Model.First().GCITY </div>
+                <div class="col-sm"><label>Phone:</label>WHERE IS PHONE NUM??</div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm">
+                    <h5>Case #</h5>@Model.First().GCASE
+                </div>
+                <div class="col-sm">
+                    <h5>Defendant Name & Address</h5>
+                    <label>@Model.First().GWHOLENAME</label>
+                    <label>@Model.First().GADDR</label>
+                    <label>@Model.First().GCITY, @Model.First().GSTATE  @Model.First().GZIP5 - @Model.First().GZIP4</label>
+                </div>
+                <div class="col-sm">
+                    <h5>Warrant Date:</h5>
+                    <label>@Model.First().GWDATE</label>
+                </div>
+                <div class="col-sm">
+                    <h5>Tag Info:</h5>
+                    <label>@Model.First().GTAGST - @Model.First().GTAGNO</label>
+                </div>
+                <div class="col-sm">
+                    <iframe src="https://www.google.com/maps/embed/v1/place?key=AIzaSyA8JTfWH5uw6jVixnmXrxihSHRDuGS63gE&amp;q= @Model.First().GADDR @Model.First().GCITY, @Model.First().GSTATE " allowfullscreen="" width="300" height="225"></iframe>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="card-footer text-muted">
+            <div class="row">
+                <div class="col-sm">
+                    <input type="button" class="btn btn-info" value="<< Go Back" onclick="history.go(-1)">
+                </div>
+                <div class="col-sm">
+                    <input type="button" class="btn btn-info" value="Print Screen" onclick="window.print();return false;">
+                </div>
+                <div class="col-sm">
+                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card text-center" style="border-radius:15px">
+        <div class="card-header">
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-sm">
+                    <b>Offense Dt</b>
+                    <hr />
+                    <label>@Model.First().GODATE</label>
+                </div>
+                <div class="col-sm">
+                    <b>DOB</b>
+                    <hr />
+                    <label>@Model.First().GBDATE</label>
+                </div>
+                <div class="col-sm">
+                    <b>Race</b>
+                    <hr />
+                    <label>@Model.First().GRACE</label>
+                </div>
+                <div class="col-sm">
+                    <b>Sex</b>
+                    <hr />
+                    <label>@Model.First().GSEX</label>
+                </div>
+                <div class="col-sm">
+                    <b>Hgt</b>
+                    <hr />
+                    <label>
+                        @string.Format(Model.First().GHGT.Substring(0, 1) + "\' " + Model.First().GHGT.Substring(1) + "\"")
+                    </label>
+                </div>
+                <div class="col-sm">
+                    <b>Wgt</b>
+                    <hr />
+                    <label>@Model.First().GWHT</label>
+                </div>
+                <div class="col-sm">
+                    <b>Hair</b>
+                    <hr />
+                    <label>@Model.First().GHAIR</label>
+                </div>
+                <div class="col-sm">
+                    <b>Eyes</b>
+                    <hr />
+                    <label>@Model.First().GEYES</label>
+                </div>
+                <div class="col-sm">
+                    <b>Age</b>
+                    <hr />
+                    <label>
+                        @Model.First().GAGE
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            <div class="row justify-content-start">
+                <div class="col-sm-2">
+                    <b>Warrant Offense:</b>
+                </div>
+                <div class="col-sm-10">
+                    @foreach (var warrant in Model)
+                    {
+                        <div class="row">
+                            <label style="color:red"> (@warrant.GODATE) - @warrant.GOFFD</label>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

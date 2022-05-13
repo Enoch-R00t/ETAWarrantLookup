@@ -1,0 +1,51 @@
+﻿@using ETAWarrantLookup.ViewModels;
+@model IEnumerable<ApplicationUserViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<script>
+    document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
+</script>
+
+
+<div class="card" style="border-radius:15px;">
+    <div class="card-header">
+        <h5>ETA Warrant Lookup Application Users</h5>
+    </div>
+    <div class="card-body">
+
+        @(Html.Grid(Model).Build(columns =>
+        {
+        columns.Add(m => m.Id).Titled("Id");
+        columns.Add(m => m.FirstName).Titled("First Name");
+        columns.Add(m => m.LastName).Titled("Last Name");
+        columns.Add(m => m.BusinessName).Titled("Business");
+        columns.Add(m => m.UserName).Titled("User Name");
+        columns.Add(m => m.Email).Titled("Email");
+        columns.Add(m => m.PhoneNumber).Titled("Phone Number");
+        columns.Add(m => m.LockoutEnd).Titled("Lockout End");
+        columns.Add(m => m.LockoutEnabled).Titled("Lockout Enabled");
+        columns.Add(m => m.AccessFailedCount).Titled("Acces Failed Count");
+        })
+        .Using(GridFilterMode.Header)
+        .Empty("No data found")
+        //.Filterable()
+        //.Sortable()
+            @* .Pageable(pager =>
+                {
+                pager.PageSizes = new Dictionary<Int32, String> { { 0, "All" }, { 2, "2" }, { 4, "4" } };
+                pager.ShowPageSizes = true;
+                pager.PagesToDisplay = 1;
+                pager.CurrentPage = 1;
+                pager.RowsPerPage = 5;
+                })*@
+
+        )
+    </div>
+</div>
+
+
+
+

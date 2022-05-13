@@ -1,0 +1,33 @@
+﻿@model IEnumerable<WarrantModel>
+
+<script>
+    document.querySelectorAll(".mvc-grid").forEach(element => new MvcGrid(element));
+</script>
+
+@(Html.Grid(Model).Build(columns =>
+        {
+            columns.Add(m => "<a href=" + m.GWARRANTDETAILSURL + ">"+ m.GCASE +"</a>").Titled("Case #").IsEncoded=false;
+            columns.Add(m => m.GWHOLENAME).Titled("Last, First");
+            columns.Add(m => m.GHGT.Substring(0,1) + "\' " + m.GHGT.Substring(1) + "\"").Titled("Hgt");
+            columns.Add(m => m.GWHT + " lbs").Titled("Wgt");
+            columns.Add(m => m.GEYES).Titled("Eyes");
+            columns.Add(m => m.GHAIR).Titled("Hair");
+            columns.Add(m => m.GRACE).Titled("Race");
+            columns.Add(m => m.GSEX).Titled("Sex");
+            columns.Add(m => m.GBDATE).Titled("DOB");
+            columns.Add(m => m.GCITY).Titled("City");
+        })
+         .Using(GridFilterMode.Header)
+    .Empty("No data found")
+    //.Filterable()
+    //.Sortable()
+    @* .Pageable(pager =>
+    {
+        pager.PageSizes = new Dictionary<Int32, String> { { 0, "All" }, { 2, "2" }, { 4, "4" } };
+        pager.ShowPageSizes = true;
+        pager.PagesToDisplay = 1;
+        pager.CurrentPage = 1;
+        pager.RowsPerPage = 5;
+    })*@
+
+        )

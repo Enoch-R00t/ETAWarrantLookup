@@ -1,0 +1,18 @@
+﻿
+// caching reference: https://www.c-sharpcorner.com/article/caching-mechanism-in-asp-net-core/
+// mvc-grid: https://mvc-grid.azurewebsites.net/    http://mvcgrid.net/documentation
+
+
+// tutorial for registration with custom context: https://www.tektutorialshub.com/asp-net-core/asp-net-core-identity-tutorial/
+// another for custom retistration: https://www.yogihosting.com/aspnet-core-identity-email-confirmation/
+
+//seeding admin and role: https://stackoverflow.com/questions/50785009/how-to-seed-an-admin-user-in-ef-core-2-1-0
+
+TBD - 
+The registration sequence needs to have the payment step added. How does the client want to track if a user paid and how long their subscription lasts
+The queries in warrant controller need to be optimized based on the final state of the data (ie use iqueryable instead of enumerable)
+Need to determine how long to set the cache length time for
+
+
+add odd row formatting to the grid
+make email question address configurable
