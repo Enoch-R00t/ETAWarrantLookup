@@ -1,0 +1,12 @@
+﻿@using ETAWarrantLookup.ViewModels
+@model AccountPaymentErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<h4 class="text-danger">Error.</h4>
+<h5 class="text-danger">An error occurred while processing your request.</h5>
+
+<p>
+    @Model.Error
+</p>

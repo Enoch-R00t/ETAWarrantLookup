@@ -365,7 +365,7 @@ namespace ETAWarrantLookup.Controllers
                 //setting up cache options
                 var cacheExpiryOptions = new MemoryCacheEntryOptions
                 {
-                    AbsoluteExpiration = DateTime.Now.AddSeconds(5000),
+                    AbsoluteExpiration = DateTime.Now.AddSeconds(5000),  //TODO - figure out what to set this to in prod
                     Priority = CacheItemPriority.High,
                     SlidingExpiration = TimeSpan.FromSeconds(2000)
                 };

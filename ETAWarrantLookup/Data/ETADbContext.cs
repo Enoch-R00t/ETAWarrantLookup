@@ -5,16 +5,33 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ETAWarrantLookup.Data
 {
     public class Subscription
     {
-        public string SubscriptionId { get; set; }
+        [Column]
+        [Key]
+        public int SubscriptionId { get; set; }
+        [Column]
+        [Required]
+        public Guid ReferenceToken { get; set; }
+        [Column]
+        [Required]
         public string ApplicationUserId { get; set; }
-        public string PaymentId { get; set; }
-        public string PaymentToken { get; set; }
-        public DateTime PaymentDate { get; set; }
+        [Column]
+        
+        public string ReferenceId { get; set; }
+        [Column]
+        public string AuthorizationCode { get; set; }
+        [Column(TypeName = "decimal(6,2)")]
+        public decimal? PaymentAmount { get; set; }
+        [Column]
+        public DateTime? PaymentDate { get; set; }
+        [Column]
+        public DateTime? PaymentExpirationDate { get; set; }
     }
 
 
@@ -33,6 +50,13 @@ namespace ETAWarrantLookup.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+
+            modelBuilder.Entity<Subscription>()
+                .Property(p => p.PaymentAmount)
+                .HasColumnType("decimal(6,2)");
+
 
             //seed admin account and claim
             // any guid

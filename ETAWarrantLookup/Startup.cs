@@ -8,6 +8,7 @@ using ETAWarrantLookup.Models;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -76,6 +77,26 @@ namespace ETAWarrantLookup
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
             });
 
+            //For use of CORS in the paymentSuccess method from the card processor
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "CORSPolicy",
+                    policy => {
+                        policy.WithOrigins("https://demoridge.govtportal.com")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                        });
+            });
+
+            // works with CORS for the credit card payment site
+            //app.UseCors(builder =>https://demoridge.govtportal.com/
+            //{
+            //    builder.WithOrigins("https://demoridge.govtportal.com")
+            //    .AllowAnyMethod()
+            //    .AllowAnyHeader()
+            //    .AllowCredentials();
+            //});
+
             services.AddMvc(options =>
             {
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
@@ -108,11 +129,25 @@ namespace ETAWarrantLookup
                 //app.UseHsts();
             }
             app.UseHttpsRedirection();
+            
+            // Allow us to get the local ipaddress to 
+            // build the credit card payment redirect
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto
+            });
+
             app.UseStaticFiles();
 
             app.UseRouting();
+
+
+            app.UseCors("CORSPolicy");
+
             app.UseAuthentication();
             app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {
@@ -120,6 +155,8 @@ namespace ETAWarrantLookup
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            
         }
     }
 }

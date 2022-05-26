@@ -1,3 +1,28 @@
 ﻿@{
     ViewData["Title"] = "Payment";
 }
+<br />
+
+<div class="card">
+    <div class="card-header">
+        <p>Subscription to the ETAWarrantLookup application is $100.00 per year. After clicking "Confirm" you will be redirected to 
+            our third-party payment site for processing.
+        </p>
+    </div>
+    <div class="card-body">
+        
+ <form action="https://demoridge.govtportal.com/standalone-redirect-form" method="post">
+        <div class="form-group">                
+          <input type="hidden" name="uniq_id" id="uniq_id" value=@ViewBag.refToken />
+        </div>
+        <div class="form-group">
+          <label for="amount">Amount</label>
+          <input type="text" class="form-control" readonly name="amount" id="amount" value=@ViewBag.amount />
+        </div>
+        <input type="hidden" name="portal_id" value="gp2993" />
+        <input type="hidden" name="redirect_url" value=@ViewBag.redirectUrl />
+        <button type="submit" class="btn btn-info btn-lg">Submit</button>
+</form>
+    </div>
+    <div class="card-footer"></div>
+</div>

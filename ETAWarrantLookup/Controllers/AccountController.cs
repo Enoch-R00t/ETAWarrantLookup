@@ -1,10 +1,19 @@
-﻿using ETAWarrantLookup.Models;
+﻿using ETAWarrantLookup.Data;
+using ETAWarrantLookup.Models;
 using ETAWarrantLookup.ViewModels;
 
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
+using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ETAWarrantLookup.Controllers
@@ -15,13 +24,27 @@ namespace ETAWarrantLookup.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ILogger<Account> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly ETADbContext _dbContext;
         //private readonly EmailHelper _emailHelper;
 
-        public Account(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager/*, EmailHelper emailHelper*/) 
+       
+
+
+        public Account(UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration,
+            ILogger<Account> logger, 
+            ETADbContext dbContext/*, EmailHelper emailHelper*/) 
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _configuration = configuration;
+            _logger = logger;
+            _dbContext = dbContext;
             //_emailHelper = emailHelper;
         }
 
@@ -51,6 +74,20 @@ namespace ETAWarrantLookup.Controllers
                 {
                     // Resolve the user via their email
                     var user = await _userManager.FindByNameAsync(model.UserName);
+
+                    // Does the user have a valid subscription?
+                    if(!SubscriptionCurrent(user.Id))
+                    {
+                        return RedirectToAction("Payment", "Account");
+                    }
+
+                    // Get subscriptione expiration to use in Layout
+                    var subscriptionExpires = SubscriptionExpires(user.Id);
+                    if (subscriptionExpires != null)
+                    {
+                        HttpContext.Session.SetString("subscriptionExpires", ((DateTime)subscriptionExpires).ToShortDateString());
+                    }
+
                     // Get the roles for the user
                     var roles = await _userManager.GetRolesAsync(user);
 
@@ -120,10 +157,128 @@ namespace ETAWarrantLookup.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Payment()
         {
+            // Get logged in users id to use for the ApplicationUserId for the new subscription
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+           
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Create a new unique Id for the transaction token and store in the db
+            Guid refToken = Guid.NewGuid();
+
+            try
+            {
+                _dbContext.Subscriptions.Add(
+                   new Subscription
+                   {
+                       ReferenceToken = refToken,
+                       ApplicationUserId = userId
+                   });
+
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
+
+            // build up the redirect url for the credit card processor         
+            // Get file name and parent directory from config
+            var localIpAddress = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "IPAddress").Value;
+            var localPort = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "Port").Value;
+
+            ViewBag.refToken = refToken;
+            ViewBag.amount = "100.00";
+            ViewBag.redirectUrl = string.Format("{0}{1}:{2}{3}{4}", "https://",  localIpAddress, localPort, "/Account/PaymentRedirect?refToken=", refToken);
+
+
             return View();
         }
 
+        [EnableCors("CORSPolicy")]
+        [IgnoreAntiforgeryToken]
+        [HttpPost]
+        public IActionResult PaymentRedirect()
+        {
+            //[0]: { [uniq_id, d892bee3-a8c8 - 4e06 - 8131 - d821db957c19]}
+            //[1]: { [ref_id, 879293975]}
+            //[2]: { [auth_code, 565724]}
+            //[3]: { [amount, 100]}
+
+            var refToken = HttpContext.Request.Query["refToken"];
+
+            var keys = Request.Form.ToDictionary(x => x.Key, x => x.Value.ToString());
+
+            if(keys.ContainsKey("error"))
+            {
+                //log the error
+                _logger.LogError("Credit card processing failed for ReferenceToken " + refToken + " error returned: " + keys["error"].ToString(), null);
+
+                //redirect to error page
+               return View("Error", new AccountPaymentErrorViewModel { Error = keys["error"].ToString() });
+            }
+
+            try
+            {
+                // go get the record from the db
+                var subscription = _dbContext.Subscriptions.Where(m => m.ReferenceToken == Guid.Parse(refToken)).FirstOrDefault();
+
+                // update and store
+                subscription.ReferenceId = keys["ref_id"].ToString();
+                subscription.AuthorizationCode = keys["auth_code"].ToString();
+                subscription.PaymentAmount = decimal.Parse(keys["amount"].ToString());
+                subscription.PaymentDate = DateTime.Now;
+                subscription.PaymentExpirationDate = DateTime.Now.AddYears(1);
+
+                _dbContext.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, null);
+            }
+
+            return RedirectToAction("Search", "Warrant");
+        }
+
+        private bool SubscriptionCurrent(string ApplicationUserId)
+        {
+            var subscriptions = _dbContext.Subscriptions.Where(m => m.ApplicationUserId == ApplicationUserId).ToList();
+
+            foreach(var subscription in subscriptions)
+            {
+                if(subscription.ReferenceId != null && subscription.AuthorizationCode != null && subscription.PaymentAmount != null)
+                {
+                    if(((DateTime)subscription.PaymentExpirationDate) > DateTime.Now)
+                     {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private DateTime? SubscriptionExpires(string ApplicationUserId)
+        {
+            var subscriptions = _dbContext.Subscriptions.Where(m => m.ApplicationUserId == ApplicationUserId).ToList();
+
+            foreach (var subscription in subscriptions)
+            {
+                if (subscription.ReferenceId != null && subscription.AuthorizationCode != null && subscription.PaymentAmount != null)
+                {
+                    if (((DateTime)subscription.PaymentExpirationDate) > DateTime.Now)
+                    {
+                        return (DateTime)subscription.PaymentExpirationDate;
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }

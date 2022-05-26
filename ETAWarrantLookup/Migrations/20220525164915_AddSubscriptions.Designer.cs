@@ -4,6 +4,7 @@ using ETAWarrantLookup.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ETAWarrantLookup.Migrations
 {
     [DbContext(typeof(ETADbContext))]
-    partial class ETADbContextModelSnapshot : ModelSnapshot
+    [Migration("20220525164915_AddSubscriptions")]
+    partial class AddSubscriptions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,13 +39,10 @@ namespace ETAWarrantLookup.Migrations
                     b.Property<string>("AuthorizationCode")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("PaymentAmount")
+                    b.Property<decimal>("PaymentAmount")
                         .HasColumnType("decimal(6,2)");
 
-                    b.Property<DateTime?>("PaymentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PaymentExpirationDate")
+                    b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReferenceId")
@@ -135,13 +134,13 @@ namespace ETAWarrantLookup.Migrations
                         {
                             Id = "a18be9c0-aa65-4af8-bd17-00bd9344e575",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "88b2cdfb-b8db-49c1-8c21-d491d21ec378",
+                            ConcurrencyStamp = "46fd8c61-16aa-4619-b4f8-5541a831b3af",
                             Email = "some-admin-email@nonce.fake",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "some-admin-email@nonce.fake",
                             NormalizedUserName = "admin",
-                            PasswordHash = "AQAAAAEAACcQAAAAEKwRDBHOrH+OpghJPuH8f/hovkyHL2ggJwyX6aXC5Y8lh6N2S0kGDpyy9pAfEys+cQ==",
+                            PasswordHash = "AQAAAAEAACcQAAAAENE2ia1ydx6ospABSzpxbxYTWc/1qiQQ+0zz+WYP0IyPm/uoi4J4GlZlZTuETs40kA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TwoFactorEnabled = false,
@@ -179,7 +178,7 @@ namespace ETAWarrantLookup.Migrations
                         new
                         {
                             Id = "a18be9c0-aa65-4af8-bd17-00bd9344e575",
-                            ConcurrencyStamp = "f7116bf1-2c88-448e-b947-759cbb5b7b4f",
+                            ConcurrencyStamp = "c65d9500-8037-4bcd-b2ad-e4492c734e4a",
                             Name = "admin",
                             NormalizedName = "admin"
                         });
