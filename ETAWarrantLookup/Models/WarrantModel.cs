@@ -11,10 +11,8 @@ namespace ETAWarrantLookup.Models
     public class WarrantModel
     {
         public string GWARRANTDETAILSURL { get; set; }
-
         public string GACREC { get; set; }
         public string GCORI { get; set; }
-
         public string GCASE
         {
             get
@@ -23,13 +21,9 @@ namespace ETAWarrantLookup.Models
             }
         }
         public string GCASE1 { get; set; }
-
         public string GCASE2 { get; set; }
-
         public string GCASE3 { get; set; }
-
         public string GTYPE { get; set; }
-
         public string GWHOLENAME
         {
             get
@@ -38,7 +32,6 @@ namespace ETAWarrantLookup.Models
             }
         }
         public string GLNAME { get; set; }
-
         public string GMNAME { get; set; }
         public string GFNAME { get; set; }
         public string GADDR { get; set; }
@@ -65,7 +58,6 @@ namespace ETAWarrantLookup.Models
         //}
 
         public string GSTATE { get; set; }
-
         public string GZIP5 { get; set; }
         public string GZIP4 { get; set; }
         public string GRACE { get; set; }
@@ -75,7 +67,6 @@ namespace ETAWarrantLookup.Models
         public string GEYES { get; set; }
         public string GHAIR { get; set; }
         public string GOFFD { get; set; }
-
         private string _gofdate;
         public string GODATE {
             get
@@ -110,7 +101,6 @@ namespace ETAWarrantLookup.Models
                 _gofdate = value;
             }
         }
-
         private string _gwdate;
         public string GWDATE
         {
@@ -181,7 +171,6 @@ namespace ETAWarrantLookup.Models
                 _gbdate = value;
             }
         }
-
         public int GAGE
         {
             get {
@@ -198,7 +187,6 @@ namespace ETAWarrantLookup.Models
                 return 0;
             }                                   
         }
-
         public string GUDATE { get; set; }
         public string GPORI { get; set; }
         public string GTAGNO { get; set; }
@@ -211,6 +199,5 @@ namespace ETAWarrantLookup.Models
         public string GCSZ { get; set; }
         public string GPHONE { get; set; }
         public string GPCONT { get; set; }
-
     }
 }

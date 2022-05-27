@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -28,9 +27,6 @@ namespace ETAWarrantLookup.Controllers
         private readonly IConfiguration _configuration;
         private readonly ETADbContext _dbContext;
         //private readonly EmailHelper _emailHelper;
-
-       
-
 
         public Account(UserManager<ApplicationUser> userManager, 
             SignInManager<ApplicationUser> signInManager, 
@@ -200,11 +196,16 @@ namespace ETAWarrantLookup.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Responsible for handling the POST from the payment site for credit card transactions
+        /// </summary>
+        /// <returns></returns>
         [EnableCors("CORSPolicy")]
         [IgnoreAntiforgeryToken]
         [HttpPost]
         public IActionResult PaymentRedirect()
         {
+            // This is the format that the response occurs in
             //[0]: { [uniq_id, d892bee3-a8c8 - 4e06 - 8131 - d821db957c19]}
             //[1]: { [ref_id, 879293975]}
             //[2]: { [auth_code, 565724]}
@@ -245,6 +246,11 @@ namespace ETAWarrantLookup.Controllers
             return RedirectToAction("Search", "Warrant");
         }
 
+        /// <summary>
+        /// Determines if a user has a valid subscription record in the database
+        /// </summary>
+        /// <param name="ApplicationUserId"></param>
+        /// <returns>True if and false if not</returns>
         private bool SubscriptionCurrent(string ApplicationUserId)
         {
             var subscriptions = _dbContext.Subscriptions.Where(m => m.ApplicationUserId == ApplicationUserId).ToList();
@@ -263,6 +269,11 @@ namespace ETAWarrantLookup.Controllers
             return false;
         }
 
+        /// <summary>
+        /// Determines the expiration date of the users subscription
+        /// </summary>
+        /// <param name="ApplicationUserId"></param>
+        /// <returns>DateTime value containing the expiration date</returns>
         private DateTime? SubscriptionExpires(string ApplicationUserId)
         {
             var subscriptions = _dbContext.Subscriptions.Where(m => m.ApplicationUserId == ApplicationUserId).ToList();
