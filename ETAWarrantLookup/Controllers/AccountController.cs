@@ -189,9 +189,13 @@ namespace ETAWarrantLookup.Controllers
             var localPort = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "Port").Value;
 
             ViewBag.refToken = refToken;
-            ViewBag.amount = "100.00";
+            //ViewBag.amount = "100.00";
             ViewBag.redirectUrl = string.Format("{0}{1}:{2}{3}{4}", "https://",  localIpAddress, localPort, "/Account/PaymentRedirect?refToken=", refToken);
 
+            // build up the payment processor url
+            var paymentUrl = _configuration.GetSection("PaymentSite").GetChildren().FirstOrDefault(config => config.Key == "Url").Value;
+
+            ViewBag.paymentUrl = paymentUrl;
 
             return View();
         }

@@ -63,10 +63,10 @@ namespace ETAWarrantLookup
             });
 
 
-            var emailConfig = Configuration
-                .GetSection("EmailConfiguration")
-                .Get<Settings.MailSettings>();
-            services.AddSingleton(emailConfig);
+            //var emailConfig = Configuration
+            //    .GetSection("EmailConfiguration")
+            //    .Get<Settings.MailSettings>();
+            //services.AddSingleton(emailConfig);
 
             // add support for caching in-memory to the application
             services.AddMemoryCache();

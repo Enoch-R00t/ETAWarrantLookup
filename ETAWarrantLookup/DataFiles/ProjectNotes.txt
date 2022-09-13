@@ -16,3 +16,10 @@ Need to determine how long to set the cache length time for
 
 add odd row formatting to the grid
 make email question address configurable
+
+SQL Server Name SQLEXPRESS
+username: etaWarrantLookupUser 
+password: 3t@W@rrantL00kup!
+
+Constring: Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;
+command prompt command to connect: sqlcmd -S DESKTOP-SLLTEOE\SQLEXPRESS -E

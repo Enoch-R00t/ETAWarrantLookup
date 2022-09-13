@@ -6,23 +6,47 @@
 <div class="card">
     <div class="card-header">
         <p>
-            Subscription to the ETAWarrantLookup application is $100.00 per year. After clicking "Confirm" you will be redirected to
-            our third-party payment site for processing.
+            Subscription to the ETAWarrantLookup application is $100.00 per year or $0.99 per lookup. Please select your option from the 2 radio
+            buttons below. After clicking "Confirm" you will be redirected to our third-party payment site for processing.
+        </p>
+        <p>
+            <div id="radio_box">
+                <input type="radio" id="oneTime" name="contacts" value=".99">
+                <label for="oneTime"> One Time Payment</label>
+                <br />
+                <input type="radio" id="year" name="contacts" value="100.00">
+                <label for="year"> One Year Subscription</label>
+            </div>
         </p>
     </div>
     <div class="card-body">
-        <form action="https://demoridge.govtportal.com/standalone-redirect-form" method="post">
+        <form action=@ViewBag.paymentUrl method="post">
             <div class="form-group">
                 <input type="hidden" name="uniq_id" id="uniq_id" value=@ViewBag.refToken />
             </div>
             <div class="form-group">
                 <label for="amount">Amount</label>
-                <input type="text" class="form-control" readonly name="amount" id="amount" value=@ViewBag.amount />
+                <input type="text" class="form-control" readonly name="amount" id="amount" value=".99"/>
             </div>
             <input type="hidden" name="portal_id" value="gp2993" />
             <input type="hidden" name="redirect_url" value=@ViewBag.redirectUrl />
-            <button type="submit" class="btn btn-info btn-lg">Submit</button>
+            <button type="submit" class="btn btn-info btn-lg">Confirm</button>
         </form>
     </div>
     <div class="card-footer"></div>
 </div>
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#oneTime").prop("checked", true);
+        });
+
+        $('#radio_box').change(function () {
+            selected_value = $("input[name = 'contacts']:checked").val();
+            $('#amount').val(selected_value);            
+        });
+    </script>
+}
