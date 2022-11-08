@@ -23,3 +23,11 @@ password: 3t@W@rrantL00kup!
 
 Constring: Server=localhost\SQLEXPRESS;Database=master;Trusted_Connection=True;
 command prompt command to connect: sqlcmd -S DESKTOP-SLLTEOE\SQLEXPRESS -E
+
+----------------------database context operations -----------------------------
+add-migrations
+
+
+
+test information
+credit card 4111 1111 1111 1111 john doe 4/23 123
