@@ -199,5 +199,7 @@ namespace ETAWarrantLookup.Models
         public string GCSZ { get; set; }
         public string GPHONE { get; set; }
         public string GPCONT { get; set; }
+
+        public string COURTPHONE { get; set; }
     }
 }

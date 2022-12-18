@@ -1,0 +1,4 @@
+2022-11-29T18:18:57.1319686-06:00  [INF] Application started. Press Ctrl+C to shut down. (dcaefe54)
+2022-11-29T18:18:57.1529858-06:00  [INF] Hosting environment: "Development" (c3307c92)
+2022-11-29T18:18:57.1556495-06:00  [INF] Content root path: "D:\Repos\Enoch-R00t\ETAWarrantLookup\ETAWarrantLookup" (b5d60022)
+2022-11-29T18:18:57.3028394-06:00 80000004-0002-fb00-b63f-84710c7967bb [INF] Main accessed (77570c3e)

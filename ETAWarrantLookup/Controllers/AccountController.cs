@@ -71,8 +71,16 @@ namespace ETAWarrantLookup.Controllers
                     // Resolve the user via their email
                     var user = await _userManager.FindByNameAsync(model.UserName);
 
+                    // Get the roles for the user
+                    var roles = await _userManager.GetRolesAsync(user);
+
+                    if (roles.Contains("admin"))
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
+
                     // Does the user have a valid subscription?
-                    if(!SubscriptionCurrent(user.Id))
+                    if (!SubscriptionCurrent(user.Id))
                     {
                         return RedirectToAction("Payment", "Account");
                     }
@@ -84,13 +92,7 @@ namespace ETAWarrantLookup.Controllers
                         HttpContext.Session.SetString("subscriptionExpires", ((DateTime)subscriptionExpires).ToShortDateString());
                     }
 
-                    // Get the roles for the user
-                    var roles = await _userManager.GetRolesAsync(user);
-
-                    if(roles.Contains("admin"))
-                    {
-                        return RedirectToAction("Index", "Admin");
-                    }
+                   
                     return RedirectToAction("Search", "Warrant");
                 }
             }
@@ -138,9 +140,7 @@ namespace ETAWarrantLookup.Controllers
                     //    // log email failed 
                     //}
 
-                    return RedirectToAction("Payment");
-                    //return RedirectToAction("Login");
-
+                    return RedirectToAction("Payment");          
                 }
                 else
                 {
@@ -154,14 +154,16 @@ namespace ETAWarrantLookup.Controllers
 
         [HttpGet]
         [Authorize]
-        public IActionResult Payment()
+        public async Task<IActionResult> Payment()
         {
+            PaymentOptionsViewModel vm = new PaymentOptionsViewModel();
+
             // Get logged in users id to use for the ApplicationUserId for the new subscription
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
            
             if (userId == null)
             {
-                return RedirectToAction("Index", "Home");
+                RedirectToAction("Index", "Home");
             }
 
             // Create a new unique Id for the transaction token and store in the db
@@ -184,20 +186,21 @@ namespace ETAWarrantLookup.Controllers
             }
 
             // build up the redirect url for the credit card processor         
-            // Get file name and parent directory from config
             var localIpAddress = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "IPAddress").Value;
-            var localPort = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "Port").Value;
+            var localProtocol = _configuration.GetSection("LocalHostConfiguration").GetChildren().FirstOrDefault(config => config.Key == "Protocol").Value;
 
-            ViewBag.refToken = refToken;
-            //ViewBag.amount = "100.00";
-            ViewBag.redirectUrl = string.Format("{0}{1}:{2}{3}{4}", "https://",  localIpAddress, localPort, "/Account/PaymentRedirect?refToken=", refToken);
+            vm.referenceToken = refToken;
+            
+            vm.redirectUrl = string.Format("{0}{1}{2}{3}{4}", localProtocol, "://", localIpAddress, "/Account/PaymentRedirect?refToken=", refToken);
 
             // build up the payment processor url
             var paymentUrl = _configuration.GetSection("PaymentSite").GetChildren().FirstOrDefault(config => config.Key == "Url").Value;
 
-            ViewBag.paymentUrl = paymentUrl;
+            vm.paymentUrl = paymentUrl;
 
-            return View();
+            vm.paymentOptions = _dbContext.PaymentOptions.ToList();
+
+            return View(vm);
         }
 
         /// <summary>
@@ -206,7 +209,9 @@ namespace ETAWarrantLookup.Controllers
         /// <returns></returns>
         [EnableCors("CORSPolicy")]
         [IgnoreAntiforgeryToken]
+       // [AllowAnonymous]
         [HttpPost]
+        //[Route("PaymentRedirect")]
         public IActionResult PaymentRedirect()
         {
             // This is the format that the response occurs in
@@ -236,16 +241,20 @@ namespace ETAWarrantLookup.Controllers
                 // update and store
                 subscription.ReferenceId = keys["ref_id"].ToString();
                 subscription.AuthorizationCode = keys["auth_code"].ToString();
-                subscription.PaymentAmount = decimal.Parse(keys["amount"].ToString());
+                subscription.PaymentAmount = decimal.Parse(keys["amount"].ToString()); 
                 subscription.PaymentDate = DateTime.Now;
-                subscription.PaymentExpirationDate = DateTime.Now.AddYears(1);
+
+                var expDate = _dbContext.PaymentOptions.Where(m => m.Price == subscription.PaymentAmount).FirstOrDefault().TimeFrame;
+                subscription.PaymentExpirationDate = DateTime.Now.AddDays(expDate);
 
                 _dbContext.SaveChanges();
+
             }
             catch(Exception ex)
             {
                 _logger.LogError(ex, null);
             }
+
 
             return RedirectToAction("Search", "Warrant");
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace ETAWarrantLookup
 {
@@ -82,20 +84,11 @@ namespace ETAWarrantLookup
             {
                 options.AddPolicy(name: "CORSPolicy",
                     policy => {
-                        policy.WithOrigins("https://demoridge.govtportal.com")
+                        policy.WithOrigins("https://*.govtportal.com")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                         });
             });
-
-            // works with CORS for the credit card payment site
-            //app.UseCors(builder =>https://demoridge.govtportal.com/
-            //{
-            //    builder.WithOrigins("https://demoridge.govtportal.com")
-            //    .AllowAnyMethod()
-            //    .AllowAnyHeader()
-            //    .AllowCredentials();
-            //});
 
             services.AddMvc(options =>
             {
@@ -113,8 +106,11 @@ namespace ETAWarrantLookup
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            var path = Directory.GetCurrentDirectory();
+            loggerFactory.AddFile($"{path}\\Logs\\Log.txt");
+
             app.UseSession();
             //app.UseMvc();
 
@@ -128,7 +124,7 @@ namespace ETAWarrantLookup
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 //app.UseHsts();
             }
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             
             // Allow us to get the local ipaddress to 
             // build the credit card payment redirect

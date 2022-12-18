@@ -34,6 +34,29 @@ namespace ETAWarrantLookup.Data
         public DateTime? PaymentExpirationDate { get; set; }
     }
 
+    public class PaymentOptions
+    {
+        [Column]
+        [Key]
+        public int PaymentOptionId { get; set; }
+
+        [Column]
+        [Required]
+        public int DisplayOrder { get; set; }
+
+        [Column]
+        [Required]
+        public int TimeFrame { get; set; }
+        
+        [Column(TypeName = "decimal(6,2)")]
+        [Required]
+        public decimal Price { get; set; }
+
+        [Column]
+        [Required]
+        public string Description { get; set; }
+      
+    }
 
 
     public class ETADbContext : IdentityDbContext<ApplicationUser, IdentityRole, string>
@@ -45,13 +68,16 @@ namespace ETAWarrantLookup.Data
         }
 
         public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<PaymentOptions> PaymentOptions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-
+            modelBuilder.Entity<PaymentOptions>()
+               .Property(p => p.Price)
+               .HasColumnType("decimal(6,2)");
 
             modelBuilder.Entity<Subscription>()
                 .Property(p => p.PaymentAmount)

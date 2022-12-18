@@ -12,10 +12,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic.FileIO;
 
 using Newtonsoft.Json;
-
+using NuGet.Packaging.Signing;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.OleDb;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -148,6 +149,11 @@ namespace ETAWarrantLookup.Controllers
         {
             var data = GetWarrants().GetAwaiter().GetResult().ToList();
 
+            var data2 = GetAgencies().GetAwaiter().GetResult().ToList();
+
+
+            //gname = bco
+
             // this will retrieve the 1 record that matches the query parameters
             var warrants = 
                 data.Where(m => m.GCASE1 == c1)
@@ -158,6 +164,12 @@ namespace ETAWarrantLookup.Controllers
 
             if (warrants.Count > 0)
             {
+                foreach(var d in warrants)
+                {
+                    d.COURTPHONE = data2.Where(m => m.BNAME == d.GNAME).FirstOrDefault().BPHONE.ToString();
+                }
+
+
                 // now we need to see if there are others that match.
                 var otherWarrants =
                     data.Where(m => m.GLNAME == warrants.First().GLNAME)
@@ -381,5 +393,143 @@ namespace ETAWarrantLookup.Controllers
             }
           
         }
+
+        /// <summary>
+        /// Responsible for retrieving all the data from the datafile and serializing into a collection of Agency objects
+        /// </summary>
+        /// <returns></returns>
+        // TODO - make this return an IQueryable once the data is in the db
+        private async Task<IEnumerable<AgencyModel>> GetAgencies()
+        {
+            var cacheKey = "agencyList";
+
+            // check if cache entry exists
+            if (!_memoryCache.TryGetValue(cacheKey, out List<AgencyModel> agencies))
+            {
+                DataTable csvData = new DataTable();
+                string jsonString = string.Empty;
+
+                // get working directory
+                var provider = new PhysicalFileProvider(Directory.GetCurrentDirectory());
+
+                // Get file name and parent directory from config
+                var dataFileName = _configuration.GetSection("AgencyDataFile").GetChildren().FirstOrDefault(config => config.Key == "Name").Value;
+                var dataFileParentDir = _configuration.GetSection("AgencyDataFile").GetChildren().FirstOrDefault(config => config.Key == "ParentDirectory").Value;
+
+                var dataFilePath = provider.Root + dataFileParentDir + "\\" + dataFileName;
+
+                try
+                {
+                    using (TextFieldParser csvReader = new TextFieldParser(dataFilePath))
+                    {
+                        csvReader.SetDelimiters(new string[] { "," });
+                        csvReader.HasFieldsEnclosedInQuotes = true;
+                        string[] colFields;
+                        bool tableCreated = false;
+                        while (tableCreated == false)
+                        {
+                            colFields = csvReader.ReadFields();
+                            foreach (string column in colFields)
+                            {
+                                DataColumn datecolumn = new DataColumn(column);
+                                datecolumn.AllowDBNull = true;
+                                csvData.Columns.Add(datecolumn);
+                            }
+                            tableCreated = true;
+                        }
+                        while (!csvReader.EndOfData)
+                        {
+                            csvData.Rows.Add(csvReader.ReadFields());
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Log(LogLevel.Error, ex.Message);
+                }
+
+                //if everything goes well, serialize csv to json 
+                jsonString = JsonConvert.SerializeObject(csvData);
+
+
+                List<AgencyModel> agencyList = (List<AgencyModel>)JsonConvert.DeserializeObject(jsonString,
+                    (typeof(List<AgencyModel>)));
+
+
+                //setting up cache options
+                var cacheExpiryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpiration = DateTime.Now.AddSeconds(5000),  //TODO - figure out what to set this to in prod
+                    Priority = CacheItemPriority.High,
+                    SlidingExpiration = TimeSpan.FromSeconds(2000)
+                };
+
+                //setting cache entries
+                _memoryCache.Set(cacheKey, agencyList, cacheExpiryOptions);
+
+                return agencyList;
+            }
+            else
+            {
+                return agencies;
+            }
+
+        }
+
+        //private async Task DB2Connection()
+        //{
+        //    try
+        //    {
+        //        string sqltxt = "SELECT * FROM mplib.pfcarfib where LOTEF=";
+
+        //        var dt1 = new DataTable();
+        //        var ConAS400 = new OleDbConnection();
+
+        //        //ConAS400.ConnectionString = "Provider=IBMDA400; Data Source=192.168.100.100; User ID=" & My.Settings.usuario & ";" "Password=" & My.Settings.contrasena
+        //        var CmdAS400 = new OleDbCommand(sqltxt, ConAS400);
+        //        var sqlAS400 = new OleDbDataAdapter();
+        //        sqlAS400.SelectCommand = CmdAS400;
+        //        ConAS400.Open();
+        //        sqlAS400.Fill(dt1);
+        //        //grid_detalle.DataSource = dt1;
+        //        //grid_detalle.DataMember = dt1.TableName;
+        //    }
+        //catch(Exception ex)
+        //    {
+
+        //    }
+
+        //    try
+        //    {
+        //        var con = new ODBC conn
+        //    }
+
+
+
+        //try
+        //{
+        //    using (var adoCon = new OleDbConnection())
+        //    {
+        //        //var adoConStr = new OleDbConnectionStringBuilder();
+        //        adoCon.ConnectionString = "Driver={Client Access ODBC Driver (32-bit)}; System=ETA; User ID=(UserID); Password=(Password);";
+
+        //        adoCon.Open();
+
+        //        var strSQL = " SELECT * FROM (Database).(Member) WHERE SMTYP In ('SLD','RTN') GROUP BY SMCUS, SMTYP ";
+
+        //        var rsSales = adoCon.BeginTransaction
+
+
+        //    }
+        //    //adoCon.Open() "Driver={Client Access ODBC Driver (32-bit)};" & _
+        //    //  "System=ETA;" & _
+        //    //  "User ID=(UserID);" & _
+        //    //  "Password=(Password);" & _
+
+        //}
+
+
+
+        //}
     }
 }

@@ -31,3 +31,67 @@ add-migrations
 
 test information
 credit card 4111 1111 1111 1111 john doe 4/23 123
+
+
+Please use "https://api.govtportal.com/v5/redirect/payment-form" for paymentUrl.
+Regarding portal_id, you can use any valid value.
+If you are confused with portal_id, please feel free to contact Frank.
+
+
+2.) Here is a sample connection string:  
+adoCon.Open "Driver={Client Access ODBC Driver (32-bit)};" & _
+                  "System=ETA;" & _
+                  "User ID=(UserID);" & _
+                  "Password=(Password);" & _
+                  "DATABASE=(Database you are reading);"
+
+Eddie will need to create you a user ID and password on the system.
+
+3.) Here is a sample SQL statement:
+strSQL = " SELECT * " & _
+
+               " FROM (Database).(Member) " & _
+               " WHERE SMTYP In ('SLD','RTN') " & _
+               " GROUP BY SMCUS, SMTYP "
+
+      Set rsSales = adoCon.Execute(strSQL)
+
+
+      rsSales will become your record set.
+
+
+      ----------------------------------------------------------
+
+      string ConnectionString = AS400ConnectionString;
+OleDbConnection _Connection = new OleDbConnection(ConnectionString);
+OleDbCommand _Command = _Connection.CreateCommand();
+
+            string strQuery = string.Empty;
+            strQuery += @"SELECT * FROM Contacts";
+
+            if (string.IsNullOrEmpty(strQuery))
+            {
+                throw (new Exception("No Library Setup"));
+            }
+
+            _Command.CommandText = strQuery;
+            if (_Connection.State != ConnectionState.Open)
+                _Connection.Open();
+
+            OleDbDataReader reader = _Command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                //Your Logic
+            }
+
+            reader.Close();
+            if (_Connection.State != ConnectionState.Closed)
+                _Connection.Close();
+
+
+
+      
+ftp.etadatadirect.com
+U: grady
+P: Gr@dY@Nd
